@@ -19,6 +19,7 @@ RUN apt-get -y update \
     wget \
     sudo \
     iproute2 \
+    python \
     \
     git \
     zsh \
@@ -30,6 +31,11 @@ RUN apt-get -y update \
     npm \
     yarn \
     --
+
+ENV GOVERSION="1.15.2"
+RUN cd /opt && wget https://storage.googleapis.com/golang/go${GOVERSION}.linux-amd64.tar.gz && \
+    tar zxf go${GOVERSION}.linux-amd64.tar.gz && rm go${GOVERSION}.linux-amd64.tar.gz && \
+    ln -s /opt/go/bin/go /usr/bin/
 
 # docker - entrypoint will add us to the external docker group
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - \
@@ -47,23 +53,20 @@ RUN chsh -s /usr/bin/zsh dock
 USER dock
 WORKDIR /etc/_conf
 
-# Dots
-RUN git clone --depth=1 https://git.fulso.me/lorx/devconf.git ._devconf \
- && cd ._devconf \
- && git submodule init \
- && git submodule update --depth=1 \
- && make
-
-# Install nvim plugs, coc, and fzf
-RUN nvim -u ~/.config/nvim/plugs.vim --headless +'PlugUpdate --sync' +qall
-
 # Download gitstatusd so it doesn't redownload on start
 # RUN ["/bin/bash", "/bin/zsh -fis <<<'source ~/powerlevel10k/powerlevel10k.zsh-theme'"]
 RUN mkdir -p ~/.cache/gitstatus && cd ~/.cache/gitstatus \
  && curl -q -fsSL --output gitstatusd-linux-x86_64.tar.gz -- https://github.com/romkatv/gitstatus/releases/download/v1.0.0/gitstatusd-linux-x86_64.tar.gz \
  && tar -xzf gitstatusd-linux-x86_64.tar.gz
 
+# Install shared tools
+RUN go get github.com/mvdan/sh/cmd/shfmt
+
 # Let entrypoint su to our user
 USER root
+
+RUN npm install -g bash-language-server \
+ && npm install -g dockerfile-language-server-nodejs \
+ && apt-get install -y shellcheck
 
 # vim: set filetype=dockerfile :

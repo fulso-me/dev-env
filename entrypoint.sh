@@ -41,6 +41,8 @@ ln -s /_ssh /home/"$1"/.ssh
 ln -s /_kube /home/"$1"/.kube
 mkdir -p /home/"$1"/.local/share
 ln -s /_direnv /home/"$1"/.local/share/direnv
+mkdir -p /home/"$1"/.config/
+ln -s /_doctl /home/"$1"/.config/doctl
 
 cd "$5"
-exec sudo -u "$1" /usr/bin/tmux
+exec sudo -u "$1" /bin/zsh -i -c tmux
