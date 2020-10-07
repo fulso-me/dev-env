@@ -1,2 +1,3 @@
-RUN apt-get install -y python
+FROM template as env-python
+
 # vim: set filetype=dockerfile :

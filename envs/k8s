@@ -1,19 +1,27 @@
-RUN echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | tee -a /etc/apt/sources.list.d/kubernetes.list \
- && curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
- && apt-get update -y && apt-get install -y apt-transport-https kubectl \
- && npm install -g cdk8s-cli
+FROM ubuntu-npm as build-cdk8s
+RUN npm install -g cdk8s-cli
 
+FROM alpine-url as build-k9s
+### /k9s
+WORKDIR /
 RUN wget https://github.com/derailed/k9s/releases/download/v0.22.1/k9s_Linux_x86_64.tar.gz \
- && tar -xzf k9s_Linux_x86_64.tar.gz && rm k9s_Linux_x86_64.tar.gz \
- && mv k9s /usr/bin
+ && tar -xzf k9s_Linux_x86_64.tar.gz && rm k9s_Linux_x86_64.tar.gz
 
-USER dock
-
-RUN mkdir -p /home/dock/.go/bin
-ENV GOPATH=/home/dock/.go
-
+FROM ubuntu-go as build-doctl
 RUN go get github.com/digitalocean/doctl/cmd/doctl
 
-USER root
+FROM template as env-k8s
+RUN echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | tee -a /etc/apt/sources.list.d/kubernetes.list \
+ && curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
+ && apt-get update -y && apt-get install -y apt-transport-https kubectl
+
+RUN rm -rf /var/lib/apt/lists/*
+
+COPY --from=build-cdk8s /usr/local/lib/node_modules /usr/local/lib/node_modules/
+COPY --from=build-cdk8s /usr/local/bin /usr/local/bin/
+
+COPY --from=build-k9s /k9s /usr/bin/k9s
+
+COPY --from=build-doctl /home/dock/.go/bin /home/dock/.go/bin/
 
 # vim: set filetype=dockerfile :

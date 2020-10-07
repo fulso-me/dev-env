@@ -1,1 +1,3 @@
+FROM template as env-base
+
 # vim: set filetype=dockerfile :

@@ -20,7 +20,7 @@ fi
 # Rearange perms to fit the outside world
 usermod -l "$1" dock
 mkdir -p /home/"$1"
-mv -n /home/dock/* /home/dock/.* /home/"$1"
+mv -n /home/dock/* /home/dock/.* /home/"$1" 2> /dev/null
 rmdir /home/dock
 usermod -d /home/"$1" "$1"
 usermod -u "$2" "$1"
@@ -33,6 +33,11 @@ gpasswd -a "$1" docker
 
 chown -R "$2":"$4" /home/"$1"
 
+# Make sure all our confs are good
+cd /home/"$1"/._devconf
+sudo -u "$1" make
+cd /home/"$1"/.config/nvim/plugged/fzf
+sudo -u "$1" ./install --all
 # Make tmux persistant
 sed -i -r -e "s|^set -g @resurrect-dir.*$|set -g @resurrect-dir '${5}/._tmuxres'|" /home/"$1"/.tmux.conf
 
