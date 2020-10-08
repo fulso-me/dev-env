@@ -1,22 +1,37 @@
-stages:
-    - build
+image: docker:19.03.6
 
-docker-build-master:
-  # Official docker image.
-  image: docker:latest
+stages:
+  - build
+
+variables:
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_DRIVER: overlay2
+  DOCKER_BUILDKIT: 1
+  DOCKER_CLI_EXPERIMENTAL: enabled
+  BUILDX_URL: https://github.com/docker/buildx/releases/download/v0.3.1/buildx-v0.3.1.linux-amd64
+  BUILDX_BUILDER: fulsome
+  BUILDX_PLATFORM: linux/amd64
+  TEST_CMD: ""
+  IMAGE: registry.gitlab.com/dev-env/base
+
+build-docker:
   stage: build
-  variables:
-    DOCKER_HOST: tcp://localhost:2375
-    DOCKER_TLS_CERTDIR: ""
   services:
-    - name: docker:dind
-      command: ["--experimental"]    # Enable experimental features in Docker server
-  # before_script:
-    # - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    - name: docker:19.03.6-dind
+      command: ["--experimental"]
+  before_script:
+    - mkdir -p $HOME/.docker/cli-plugins/
+    - wget -O $HOME/.docker/cli-plugins/docker-buildx $BUILDX_URL
+    - chmod a+x $HOME/.docker/cli-plugins/docker-buildx
+    - "echo -e '{\n  \"experimental\": \"enabled\"\n}' | tee $HOME/.docker/config.json"
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    - docker buildx create --use --driver docker-container --name ${BUILDX_BUILDER} --platform=${BUILDX_PLATFORM}
+    - docker buildx inspect --bootstrap ${BUILDX_BUILDER}
+    - docker buildx ls
+    - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
   script:
-    - DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker version
-    # - ./build.sh
-    - DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker build .
-    # - docker build --pull -t "$CI_REGISTRY_IMAGE" .
-    # - docker push "$CI_REGISTRY_IMAGE"
+    - docker buildx build --platform=${BUILDX_PLATFORM} -t ${IMAGE}:${CI_COMMIT_SHA} --push "."
+    - docker run --rm ${IMAGE}:${CI_COMMIT_SHA} ${TEST_CMD}
+    - docker tag ${IMAGE}:${CI_COMMIT_SHA} ${IMAGE}:latest
+    - docker push ${IMAGE}:latest
 
