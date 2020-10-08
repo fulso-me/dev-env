@@ -1,4 +1,4 @@
-image: docker:latest
+image: docker:18.09.7
 
 stages:
   - build
@@ -17,7 +17,7 @@ variables:
 build-docker:
   stage: build
   services:
-    - name: docker:dind
+    - name: docker:18.09.7-dind
       command: ["--experimental"]
   before_script:
     - mkdir -p $HOME/.docker/cli-plugins/
