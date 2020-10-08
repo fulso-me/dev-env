@@ -14,9 +14,9 @@ docker-build-master:
   # before_script:
     # - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
-    - DOCKER_BUILDKIT=1 docker version
+    - DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker version
     # - ./build.sh
-    - DOCKER_BUILDKIT=1 docker build .
+    - DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker build .
     # - docker build --pull -t "$CI_REGISTRY_IMAGE" .
     # - docker push "$CI_REGISTRY_IMAGE"
 
