@@ -1,21 +1,20 @@
 FROM ubuntu-npm as build-cdk8s
-RUN npm install -g cdk8s-cli
+RUN --mount=type=cache,target=/root/.npm,sharing=locked npm install -g cdk8s-cli
 
-FROM alpine-url as build-k9s
+FROM alpine-curl as build-k9s
 ### /k9s
 WORKDIR /
 RUN wget https://github.com/derailed/k9s/releases/download/v0.22.1/k9s_Linux_x86_64.tar.gz \
  && tar -xzf k9s_Linux_x86_64.tar.gz && rm k9s_Linux_x86_64.tar.gz
 
 FROM ubuntu-go as build-doctl
-RUN go get github.com/digitalocean/doctl/cmd/doctl
+RUN --mount=type=cache,target=/root/.cache/go-build go get github.com/digitalocean/doctl/cmd/doctl
 
 FROM template as env-k8s
 RUN echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | tee -a /etc/apt/sources.list.d/kubernetes.list \
- && curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
- && apt-get update -y && apt-get install -y apt-transport-https kubectl
-
-RUN rm -rf /var/lib/apt/lists/*
+ && curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt,sharing=locked \
+ apt-get update -y && apt-get install --no-install-recommends -y kubectl
 
 COPY --from=build-cdk8s /usr/local/lib/node_modules /usr/local/lib/node_modules/
 COPY --from=build-cdk8s /usr/local/bin /usr/local/bin/

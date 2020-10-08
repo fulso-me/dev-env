@@ -17,12 +17,12 @@ COPY --from=build-shfmt /home/dock/.go/bin /home/dock/.go/bin/
 
 # Local Copies
 COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh 
+# RUN chmod +x /entrypoint.sh 
 
 # Clean apt cache
 RUN rm -rf /var/lib/apt/lists/*
 
-ENTRYPOINT [ "/entrypoint.sh" ]
+ENTRYPOINT [ "/bin/bash", "/entrypoint.sh" ]
 CMD ["--help"]
 
 # vim: set filetype=dockerfile :

@@ -48,6 +48,9 @@ mkdir -p /home/"$1"/.local/share
 ln -s /_direnv /home/"$1"/.local/share/direnv
 mkdir -p /home/"$1"/.config/
 ln -s /_doctl /home/"$1"/.config/doctl
+rm -r /home/"$1"/.vim-tmp
+ln -s /_vimtmp /home/"$1"/.vim-tmp
 
 cd "$5"
 exec sudo -u "$1" /bin/zsh -i -c tmux
+# exec  /bin/zsh -i -c tmux

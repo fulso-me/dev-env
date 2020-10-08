@@ -2,12 +2,29 @@ FROM alpine as alpine-curl
 ### Quick curl downloads
 RUN apk add --no-cache curl
 
-FROM alpine as build-go
-### Copyable go: /opt/go/bin/go
+FROM ubuntu:focal as ubuntu-npm
+### Npm executable
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt,sharing=locked \
+  apt-get update -y && apt-get install --no-install-recommends -y nodejs npm
+
+FROM ubuntu:focal as ubuntu-go
+### Go executable
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt,sharing=locked \
+  apt-get update -y && apt-get install --no-install-recommends -y git curl ca-certificates
 ENV GOVERSION="1.15.2"
-RUN cd /opt && wget https://storage.googleapis.com/golang/go${GOVERSION}.linux-amd64.tar.gz && \
-    tar zxf go${GOVERSION}.linux-amd64.tar.gz && rm go${GOVERSION}.linux-amd64.tar.gz
-    # ln -s /opt/go/bin/go /usr/bin/
+ENV GOPATH=/home/dock/.go
+RUN cd /opt && curl -L https://storage.googleapis.com/golang/go${GOVERSION}.linux-amd64.tar.gz -o go${GOVERSION}.linux-amd64.tar.gz \
+ && tar zxf go${GOVERSION}.linux-amd64.tar.gz && rm go${GOVERSION}.linux-amd64.tar.gz \
+ && ln -s /opt/go/bin/go /usr/bin/ \
+ && mkdir -p /home/dock/.go/bin
+# COPY --from=build-go /opt/go /opt/go
+
+# FROM alpine as build-go
+# ### Copyable go: /opt/go/bin/go
+# ENV GOVERSION="1.15.2"
+# RUN cd /opt && wget https://storage.googleapis.com/golang/go${GOVERSION}.linux-amd64.tar.gz && \
+#     tar zxf go${GOVERSION}.linux-amd64.tar.gz && rm go${GOVERSION}.linux-amd64.tar.gz
+#     # ln -s /opt/go/bin/go /usr/bin/
 
 FROM alpine-curl as build-docker-compose
 ### Copyable docker-compose: /bin/docker-compose
