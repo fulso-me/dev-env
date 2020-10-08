@@ -3,13 +3,13 @@ stages:
 
 docker-build-master:
   # Official docker image.
-  image: docker:stable
+  image: docker:latest
   stage: build
   variables:
     DOCKER_HOST: tcp://localhost:2375
     DOCKER_TLS_CERTDIR: ""
   services:
-    - name: docker:stable 
+    - name: docker:dind
       command: ["--experimental"]    # Enable experimental features in Docker server
   # before_script:
     # - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
