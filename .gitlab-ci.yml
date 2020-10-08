@@ -1,10 +1,10 @@
-image: docker:18.09.7
+image: docker:19.03.6
 
 stages:
   - build
 
 variables:
-  DOCKER_HOST: tcp://localhost:2375
+  # DOCKER_HOST: tcp://jocalhost:2375
   DOCKER_DRIVER: overlay2
   DOCKER_BUILDKIT: 1
   DOCKER_CLI_EXPERIMENTAL: enabled
@@ -17,7 +17,7 @@ variables:
 build-docker:
   stage: build
   services:
-    - name: docker:18.09.7-dind
+    - name: docker:19.03.6-dind
       command: ["--experimental"]
   before_script:
     - mkdir -p $HOME/.docker/cli-plugins/
