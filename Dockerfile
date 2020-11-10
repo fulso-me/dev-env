@@ -8,6 +8,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,t
  && apt-get install --no-install-recommends -y \
     locales \
     curl \
+    ssh \
     gpg-agent \
     gpg \
     less \
