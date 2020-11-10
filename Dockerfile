@@ -10,6 +10,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,t
     curl \
     gpg-agent \
     gpg \
+    less \
     ca-certificates \
     apt-transport-https \
     build-essential \
@@ -41,6 +42,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,t
   python3 \
   python3-pip \
   nodejs \
+  npm \
+  yarn \
   docker-ce \
   \
   wget \

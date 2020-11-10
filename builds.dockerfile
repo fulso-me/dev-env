@@ -17,21 +17,30 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,t
       build-essential \
       gpg-agent \
       ca-certificates \
+      curl \
+      wget \
       git \
       npm \
       yarn \
       neovim \
+      tmux \
       zsh \
-      -- \
- && mkdir -p /home/dock
+      --
 # USER dock
-WORKDIR /home/dock
+WORKDIR /root
+# Force repull
+RUN echo 0
 RUN git clone --depth=1 https://github.com/fulso-me/devconf.git ._devconf \
  && cd ._devconf \
  && git submodule init \
  && git submodule update --depth=1 \
  && make \
- && nvim -u ~/.config/nvim/plugs.vim --headless +'PlugUpdate --sync' +qall
+ && tmux start-server \
+ && tmux new-session -d \
+ && sleep 1 \
+ && /root/.tmux/plugins/tpm/bin/install_plugins \
+ && tmux kill-server \
+ && nvim -u /root/.config/nvim/plugs.vim --headless +'PlugUpdate --sync' +qall
 # Install nvim plugs, coc, and fzf
 
 # vim: set filetype=dockerfile :

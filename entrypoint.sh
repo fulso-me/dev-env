@@ -36,17 +36,24 @@ chown -R "$2":"$4" /home/"$1"
 # Make sure all our confs are good
 cd /home/"$1"/._devconf
 sudo -u "$1" make
-cd /home/"$1"/.config/nvim/plugged/fzf
-sudo -u "$1" ./install --all
+# cd /home/"$1"/.config/nvim/plugged/fzf
+# sudo -u "$1" ./install --all
+echo 'if [[ ! "$PATH" == */home/'"$1"'/._devconf/config/nvim/plugged/fzf/bin* ]]; then
+  export PATH="${PATH:+${PATH}:}/home/'"$1"'/._devconf/config/nvim/plugged/fzf/bin"
+fi
+[[ $- == *i* ]] && source "/home/'"$1"'/._devconf/config/nvim/plugged/fzf/shell/completion.zsh" 2> /dev/null
+source "/home/'"$1"'/._devconf/config/nvim/plugged/fzf/shell/key-bindings.zsh"' > /home/"$1"/.fzf.zsh
+
 # Make tmux persistant
+sudo -u "$1" mkdir -p "${5}/._tmuxres"
 sed -i -r -e "s|^set -g @resurrect-dir.*$|set -g @resurrect-dir '${5}/._tmuxres'|" /home/"$1"/.tmux.conf
 
 # link secret keys
 ln -s /_ssh /home/"$1"/.ssh
 ln -s /_kube /home/"$1"/.kube
-mkdir -p /home/"$1"/.local/share
+sudo -u "$1" mkdir -p /home/"$1"/.local/share
 ln -s /_direnv /home/"$1"/.local/share/direnv
-mkdir -p /home/"$1"/.config/
+sudo -u "$1" mkdir -p /home/"$1"/.config/
 ln -s /_doctl /home/"$1"/.config/doctl
 rm -r /home/"$1"/.vim-tmp
 ln -s /_vimtmp /home/"$1"/.vim-tmp
