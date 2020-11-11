@@ -26,7 +26,7 @@ function compile() {
     exit 1
   fi
 
-  echo docker push \""fulsome/${ORG}/${NAME}:$(basename "$i")"\" >> commit.sh
+  echo docker push \""${ORG}/${NAME}:$(basename "$i")"\" >> commit.sh
 }
 
 ORG="fulsome"
