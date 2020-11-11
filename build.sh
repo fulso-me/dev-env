@@ -25,6 +25,8 @@ function compile() {
   if [ ! "$?" ]; then
     exit 1
   fi
+
+  echo docker push \""fulsome/${ORG}/${NAME}:$(basename "$i")"\" >> commit.sh
 }
 
 ORG="fulsome"
@@ -40,6 +42,9 @@ fi
 mkdir -p buildcontext
 cp entrypoint.sh buildcontext/
 
+echo "#!/bin/bash" > commit.sh
+chmod -x commit.sh
+
 if [ -z "$1" ]; then
   for i in envs/*; do
     compile
@@ -48,6 +53,8 @@ else
   i=envs/"$1"
   compile
 fi
+
+chmod +x commit.sh
 
 rm buildcontext/Dockerfile buildcontext/entrypoint.sh
 rmdir buildcontext
